@@ -9,6 +9,8 @@
 #define NEWLINE 6
 #define NONE 7
 
+/* this is a sample testing */
+
 int main(void) 
 {
     int prev_state;
@@ -16,8 +18,11 @@ int main(void)
     int quote_state = OUT_QUOTES;
     int nlineState = NONE;
     int x, prev;
+    int currentCmtLine = 0, currentLogLine = 0, set = 0;
     while((x = getchar()) != EOF)
     {
+        if (x == '\n')
+            currentLogLine++;
         if ((state == SLASH_MARK && (x != '*' && x != '/')) || (state == KLEENE_MARK && (x != '/' && x !='*')))
             state = prev_state;
         if ((x == '\'' || x == '\"') && state == OUT_COMMENT && prev != '\\')
@@ -35,7 +40,10 @@ int main(void)
                 state = KLEENE_MARK;
             }
             else if(state == SLASH_MARK)
+            {
                 state = IN_COMMENT;
+                set = 1;
+            }
             else if(state == KLEENE_MARK && prev == '*')
             {
                 putchar(prev);
@@ -66,12 +74,20 @@ int main(void)
         }
         if (state == OUT_COMMENT || (quote_state == IN_QUOTES && state == OUT_COMMENT) || (state == IN_COMMENT && x == '\n'))
         {
-            if (state == IN_COMMENT && x == '\n')
+            if (state == IN_COMMENT && x == '\n' && set)
+            {
                 nlineState = NEWLINE;
+                currentCmtLine = currentLogLine;
+                set = 0;
+            }
             putchar(x);
         }
         prev = x;
     }
-    if (comStat == UNTERMINATED)
+    if (state == IN_COMMENT)
+    {
+        fprintf(stderr, "Error: line %d: unterminated comment\n", currentCmtLine);
+        return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }
