@@ -8,6 +8,7 @@
 #define OUT_QUOTES 5
 #define NEWLINE 6
 #define NONE 7
+#define UNTERMINATED 8
 
 int main(void) 
 {
@@ -73,5 +74,6 @@ int main(void)
         prev = x;
     }
     if (comStat == UNTERMINATED)
+        return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
